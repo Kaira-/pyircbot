@@ -2,9 +2,10 @@ import sys
 import socket
 import string
 
-SERVER = "irc.saunalahti.fi"
-CHANNEL = "#blanko.lautapelit"
-BOTNICK = "KairaBot"
+#these are only temporarily here until class definition is complete
+SERVER = ""
+CHANNEL = ""
+BOTNICK = ""
 readbuf = ""
 irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
