@@ -13,15 +13,6 @@ class IRCBot(object):
 		self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.PORT = 6667
 		
-	def __init__(self, serv, chan, nick):
-		self.SERVER = serv		#server goes here
-		self.CHANNELS = []		#list of channels goes here
-		self.CHANNELS.append(serv)
-		self.BOTNICK = nick		#bot's nick goes here
-		self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.readbuf = ""		#buffer for server messages
-		self.PORT = 6667
-		
 	def __init__(self, serv, chan, nick, port):
 		self.SERVER = serv		#server goes here
 		self.CHANNELS = []		#list of channels goes here
@@ -30,6 +21,13 @@ class IRCBot(object):
 		self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.readbuf = ""		#buffer for server messages
 		self.PORT = port
+		self._connect(serv)
+		
+	def _connect(self, serv):
+		self.irc.connect((self.SERVER, self.PORT))
+		self.irc.send("NICK " + BOTNICK + '\r\n')
+		self.irc.send("USER " + BOTNICK + " " + BOTNICK + " " + BOTNICK + " :This bot is herpaderp.")
+		self._joinchannel(self.CHANNELS[0])
 	
 	def _joinchannel(self, chan):
 		self.irc.send("JOIN " + chan + "\r\n")
@@ -44,7 +42,7 @@ class IRCBot(object):
 	def processForever(self):
 		#this is the important main loop of the bot. PING PONG and so forth
 		while 1:
-			readbuf = self.irc.recv(1024)
+			readbuf = self.irc.recv(4096)
 			readbuf = self.readbuf.strip('\r\n')
 			prefix, command, args = Parser.parse(readbuf)
 			nick = Parser.parsenick(prefix)
@@ -56,16 +54,6 @@ class IRCBot(object):
 			if msg.find("PING") != -1:
 				self._ping(msg)
 				
-def ping(data):					#respond to server PINGs
-	irc.send("PONG " + data.split()[1] + "\r\n")
-	
-def sendmsg(chan, msg):		#send message to channel
-	irc.send("PRIVMSG " + chan + " :" + msg + "\r\n")
-
-def joinchan(chan):			#join channel
-	irc.send("JOIN " + chan + "\r\n")
-	irc.send("PRIVMSG " + chan + " :I LIVE ONCE AGAIN\r\n")
-
 class Parser(object):
 	@classmethod
 	def parsemsg(cls, line):
@@ -101,4 +89,19 @@ class IRCBadMessage(Exception):
 #begin execution
 
 #check command line arguments
-#if len(sys.argv) < 2:
+if len(sys.argv) == 4 or len(sys.argv) == 5:
+	#handle params
+	server = sys.argv[1]
+	channel = sys.argv[2]
+	nick = sys.argv[3]
+	port = 6667
+	if len(sys.argv) == 5:
+		port = sys.argv[4]
+		port = int(port)
+	
+	print "Server: %s Channel: %s Nick: %s Port: %s" %server %channel %nick %port
+	mybot = IRCBot(server, channel, nick, port)
+	mybot.processForever()
+	
+else:
+	sys.exit("Usage: %s <server> <channel> <nick>  [ <port>] " % sys.argv[0])
