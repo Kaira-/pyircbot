@@ -1,13 +1,9 @@
+# Copyright (c) Jukka Pietila 2012
+# see LICENSE for details
+
 import sys
 import socket
 import string
-
-#these are only temporarily here until class definition is complete
-SERVER = ""
-CHANNEL = ""
-BOTNICK = ""
-readbuf = ""
-irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 class IRCBot(object):
 	def __init__(self):
@@ -34,14 +30,32 @@ class IRCBot(object):
 		self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.readbuf = ""		#buffer for server messages
 		self.PORT = port
-		
+	
+	def _joinchannel(self, chan):
+		self.irc.send("JOIN " + chan + "\r\n")
+		self.irc.send("PRIVMSG " + chan + " :I LIVE ONCE AGAIN\r\n")	#announce join
+	
+	def _ping(self, data):
+		self.irc.send("PONG " + data.split()[1] + "\r\n")
+	
+	def _sendmsg(self, msg, chan):
+		self.irc.send("PRIVMSG " + chan + " :" + msg + '\r\n')
+	
 	def processForever(self):
 		#this is the important main loop of the bot. PING PONG and so forth
 		while 1:
-			self.readbuf = self.irc.recv(1024)
-			self.readbuf = self.readbuf.strip('\r\n')
-			
-
+			readbuf = self.irc.recv(1024)
+			readbuf = self.readbuf.strip('\r\n')
+			prefix, command, args = Parser.parse(readbuf)
+			nick = Parser.parsenick(prefix)
+			channel = args[0]
+			msg = args[1]
+			if msg.find(BOTNICK) != -1:
+				smsg = nick + ", suck my salty chocolate balls"
+				self._sendmsg(smsg, chan)
+			if msg.find("PING") != -1:
+				self._ping(msg)
+				
 def ping(data):					#respond to server PINGs
 	irc.send("PONG " + data.split()[1] + "\r\n")
 	
@@ -50,23 +64,41 @@ def sendmsg(chan, msg):		#send message to channel
 
 def joinchan(chan):			#join channel
 	irc.send("JOIN " + chan + "\r\n")
-	irc.send("PRIVMSG " + chan + " I LIVE ONCE AGAIN\r\n")
+	irc.send("PRIVMSG " + chan + " :I LIVE ONCE AGAIN\r\n")
 
+class Parser(object):
+	@classmethod
+	def parsemsg(cls, line):
+		"""Breaks a message from IRC server into prefix, command and args
+		"""
+		prefix = ""
+		trailing = []
+		if not line:
+			raise IRCBadMessage("Empty line.")
+		if line[0] == ':':
+			prefix, line = line[1:].split(' ', 1)
+		if line.find(' :') != -1:
+			line, trailing = line.split(' :', 1)
+			args = line.split()
+			args.append(trailing)
+		else:
+			args = line.split()
+		command = args.pop(0)
+		return prefix, command, args
+		
+	@classmethod
+	def parsenick(cls, s):
+		"""Parses the nick from string, if possible
+		"""
+		split_list = s.split('!')
+		return split_list[0]
+
+class IRCBadMessage(Exception):
+	pass
+		
+		
+	
 #begin execution
 
-if len(sys.argv) < 2:
-	
-
-irc.connect((SERVER, 6667))	#connect to serv using port 6667
-irc.send("NICK " + BOTNICK + "\r\n")	#assign nick to the bot
-irc.send("USER " + BOTNICK + " " + BOTNICK + " " + BOTNICK + " :This bot is a result of a tutorial covered on http://shellium.org/wiki.\r\n") # user authentication
-
-joinchan(CHANNEL)	#join the channel
-
-while 1:	#looping
-	readbuf = irc.recv(2048)	#receive data from server
-	readbuf = readbuf.strip('\r\n')	#remove unnecessary linebreaks
-	print readbuf					#print from server
-	
-	if readbuf.find("PING :") != -1:			#if server pings, we pong
-		ping(readbuf)
+#check command line arguments
+#if len(sys.argv) < 2:
