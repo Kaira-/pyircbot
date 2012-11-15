@@ -16,43 +16,58 @@ class IRCBot(object):
 	def __init__(self, serv, chan, nick, port):
 		self.SERVER = serv		#server goes here
 		self.CHANNELS = []		#list of channels goes here
-		self.CHANNELS.append(serv)
+		self.CHANNELS.append(chan)
 		self.BOTNICK = nick		#bot's nick goes here
 		self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.readbuf = ""		#buffer for server messages
 		self.PORT = port
-		self._connect(serv)
+		self._connect()
 		
-	def _connect(self, serv):
+	def _connect(self):
 		self.irc.connect((self.SERVER, self.PORT))
-		self.irc.send("NICK " + BOTNICK + '\r\n')
-		self.irc.send("USER " + BOTNICK + " " + BOTNICK + " " + BOTNICK + " :This bot is herpaderp.")
+		self.irc.send("NICK " + self.BOTNICK + "\r\n")
+		self.irc.send("USER " + self.BOTNICK + " " + self.BOTNICK + " " + self.BOTNICK + " :This bot is herpaderp.\r\n")
 		self._joinchannel(self.CHANNELS[0])
 	
 	def _joinchannel(self, chan):
 		self.irc.send("JOIN " + chan + "\r\n")
-		self.irc.send("PRIVMSG " + chan + " :I LIVE ONCE AGAIN\r\n")	#announce join
+		self._sendmsg("EVEN IN DEATH I STILL SURF", chan)	#announce join
 	
 	def _ping(self, data):
 		self.irc.send("PONG " + data.split()[1] + "\r\n")
 	
 	def _sendmsg(self, msg, chan):
-		self.irc.send("PRIVMSG " + chan + " :" + msg + '\r\n')
+		self.irc.send("PRIVMSG " + chan + " :" + msg + "\r\n")
 	
 	def processForever(self):
 		#this is the important main loop of the bot. PING PONG and so forth
+		running = 1
+		readbuf = []
 		while 1:
-			readbuf = self.irc.recv(4096)
-			readbuf = self.readbuf.strip('\r\n')
-			prefix, command, args = Parser.parse(readbuf)
-			nick = Parser.parsenick(prefix)
-			channel = args[0]
-			msg = args[1]
-			if msg.find(BOTNICK) != -1:
-				smsg = nick + ", suck my salty chocolate balls"
-				self._sendmsg(smsg, chan)
-			if msg.find("PING") != -1:
-				self._ping(msg)
+			readbuf = self.irc.recv(2048)
+			readbuf = readbuf.strip('\r\n')
+			readbuf = readbuf.strip('\n\r')
+			print readbuf
+			if readbuf == "":
+				continue
+			try:
+				prefix, command, args = Parser.parsemsg(readbuf)
+				nick = Parser.parsenick(prefix)
+				channel = args[0]
+				msg = args[1]
+				if msg.find(self.BOTNICK) != -1:
+					smsg = nick + ", suck my salty chocolate balls"
+					self._sendmsg(smsg, channel)
+				if msg.find("!quit") != -1:
+					self.irc.send("QUIT :shutting down...\r\n")
+					running = 0
+				if msg.find("PING") != -1:
+					self._ping(msg)
+				if running == 0:
+					break
+			except IRCBadMessage:
+				continue
+				
 				
 class Parser(object):
 	@classmethod
@@ -63,10 +78,10 @@ class Parser(object):
 		trailing = []
 		if not line:
 			raise IRCBadMessage("Empty line.")
-		if line[0] == ':':
-			prefix, line = line[1:].split(' ', 1)
-		if line.find(' :') != -1:
-			line, trailing = line.split(' :', 1)
+		if line[0] == ":":
+			prefix, line = line[1:].split(" ", 1)
+		if line.find(" :") != -1:
+			line, trailing = line.split(" :", 1)
 			args = line.split()
 			args.append(trailing)
 		else:
@@ -78,7 +93,7 @@ class Parser(object):
 	def parsenick(cls, s):
 		"""Parses the nick from string, if possible
 		"""
-		split_list = s.split('!')
+		split_list = s.split("!")
 		return split_list[0]
 
 class IRCBadMessage(Exception):
@@ -99,9 +114,8 @@ if len(sys.argv) == 4 or len(sys.argv) == 5:
 		port = sys.argv[4]
 		port = int(port)
 	
-	print "Server: %s Channel: %s Nick: %s Port: %s" %server %channel %nick %port
+	print "Server: " + server + " Channel: " + channel + " Nick: " + nick + " Port: " + str(port)
 	mybot = IRCBot(server, channel, nick, port)
 	mybot.processForever()
-	
 else:
 	sys.exit("Usage: %s <server> <channel> <nick>  [ <port>] " % sys.argv[0])
