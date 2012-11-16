@@ -34,8 +34,16 @@ class IRCBot(object):
 		self._sendmsg("EVEN IN DEATH I STILL SURF", chan)	#announce join
 	
 	def _ping(self, data):
-		self.irc.send("PONG " + data.split()[1] + "\r\n")
+		print "PONGING with " + (data.split()[1]).srtip(':')
+		self.irc.send("PONG " + (data.split()[1]).strip(':') + "\r\n")
 	
+	def _quit(self, msg):
+		msg_split = msg.split()[1:]
+		qmsg = ""
+		for w in msg_split:
+			qmsg = qmsg + w + " "
+		self.irc.send("QUIT :" + qmsg + "\r\n")	
+		
 	def _sendmsg(self, msg, chan):
 		self.irc.send("PRIVMSG " + chan + " :" + msg + "\r\n")
 	
@@ -51,6 +59,10 @@ class IRCBot(object):
 			if readbuf == "":
 				continue
 			try:
+				#first, answer to PINGs
+				if readbuf.find("PING") != -1 and readbuf.find("PRIVMSG") == -1:
+					self._ping(readbuf)
+					
 				prefix, command, args = Parser.parsemsg(readbuf)
 				nick = Parser.parsenick(prefix)
 				channel = args[0]
@@ -59,17 +71,15 @@ class IRCBot(object):
 					smsg = nick + ", suck my salty chocolate balls"
 					self._sendmsg(smsg, channel)
 				if msg.find("!quit") != -1:
-					self.irc.send("QUIT :shutting down...\r\n")
+					self._quit(msg)
 					running = 0
-				if msg.find("PING") != -1:
-					self._ping(msg)
-				if running == 0:
-					break
 			except IRCBadMessage:
 				continue
 			except:
 				continue
 				#even if all fails we carry on. Bad design, yay!
+			if running == 0:
+				break
 				
 class Parser(object):
 	@classmethod
