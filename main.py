@@ -67,7 +67,9 @@ class IRCBot(object):
 					break
 			except IRCBadMessage:
 				continue
-				
+			except:
+				continue
+				#even if all fails we carry on. Bad design, yay!
 				
 class Parser(object):
 	@classmethod
@@ -108,6 +110,8 @@ if len(sys.argv) == 4 or len(sys.argv) == 5:
 	#handle params
 	server = sys.argv[1]
 	channel = sys.argv[2]
+	if channel[0] != '#':
+		channel = '#' + channel
 	nick = sys.argv[3]
 	port = 6667
 	if len(sys.argv) == 5:
