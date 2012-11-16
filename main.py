@@ -42,7 +42,10 @@ class IRCBot(object):
 		qmsg = ""
 		for w in msg_split:
 			qmsg = qmsg + w + " "
-		self.irc.send("QUIT :" + qmsg + "\r\n")	
+		if qmsg != "":
+			self.irc.send("QUIT :" + qmsg + "\r\n")
+		else:
+			self.irc.send("QUIT :Quitting... \r\n")
 		
 	def _sendmsg(self, msg, chan):
 		self.irc.send("PRIVMSG " + chan + " :" + msg + "\r\n")
