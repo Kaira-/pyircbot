@@ -1,3 +1,6 @@
+# Copyright (c) Jukka Pietila 2012
+# see LICENSE for details
+
 import string
 import sys
 			

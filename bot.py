@@ -1,3 +1,6 @@
+# Copyright (c) Jukka Pietila 2012
+# see LICENSE for details
+
 import sys
 import string
 import socket
