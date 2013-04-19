@@ -1,3 +1,6 @@
+#Copyright (c) Jukka Pietila 2013
+#See LICENSE for details
+
 import io
 import config
 import sys
