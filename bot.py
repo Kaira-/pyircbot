@@ -5,24 +5,33 @@ import sys
 import string
 import socket
 import msgparser
+import confreader
+import confwriter
 
 class IRCBot(object):
 	def __init__(self):
-		self.SERVER = ""
-		self.CHANNELS = []
-		self.BOTNICK = "SomeBot"
+		self._CONFFILE = "config.conf"
+		self._CONFREADER = ConfReader(self._CONFFILE)
+		self._CONFWRITER = ConfWriter(self._CONFFILE)
+		self._config = self._CONFREADER.readConfig()
+		self.SERVER = self._config.SERVER
+		self.CHANNELS = self._config.CHANNELS
+		self.BOTNICK = self._config.BOTNAME
 		self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.PORT = 6667
-		
-	def __init__(self, serv, chan, nick, port):
-		self.SERVER = serv		#server goes here
-		self.CHANNELS = []		#list of channels goes here
-		self.CHANNELS.append(chan)
-		self.BOTNICK = nick		#bot's nick goes here
+		self.PORT = self._config.PORT
+		self.JOINMSG = self._config.JOINMSG
+
+	def __init__(self, conffile):
+		self._CONFFILE = conffile
+		self._CONFREADER = ConfReader(self._CONFFILE)
+		self._CONFWRITER = ConfWriter(self._CONFFILE)
+		self._config = self._CONFREADER.readConfig()
+		self.SERVER = self._config.SERVER
+		self.CHANNELS = self._config.CHANNELS
+		self.BOTNICK = self._config.BOTNAME
 		self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.readbuf = ""		#buffer for server messages
-		self.PORT = port
-		self._connect()
+		self.PORT = self._config.PORT
+		self.JOINMSG = self._config.JOINMSG
 		
 	def _connect(self):
 		self.irc.connect((self.SERVER, self.PORT))
