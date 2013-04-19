@@ -23,3 +23,9 @@ class Config(object):
 		self.PORT = port
 		self.JOINMSG = joinmsg
 		self.CHANNELS = channels.split(",")
+
+	def addChannel(self, newchan):
+		"""
+		Adds a new channel to the list of channels the bot has
+		"""
+		self.CHANNELS.append(newchan)
