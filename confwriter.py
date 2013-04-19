@@ -16,7 +16,7 @@ class ConfWriter(object):
 		overwriting old values.
 		@conf - The Config-object that is taken as param and extracted
 		"""
-		if type(conf) is not Config:
+		if type(conf) is not config.Config:
 			raise Exception("Given parameter was not Config!")
 
 		name = conf.BOTNAME

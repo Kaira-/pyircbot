@@ -7,7 +7,8 @@ import sys
 class Parser(object):
 	@classmethod
 	def parsemsg(cls, line):
-		"""Breaks a message from IRC server into prefix, command and args
+		"""
+		Breaks a message from IRC server into prefix, command and args
 		"""
 		prefix = ""
 		trailing = []
@@ -26,7 +27,8 @@ class Parser(object):
 		
 	@classmethod
 	def parsenick(cls, s):
-		"""Parses the nick from string, if possible
+		"""
+		Parses the nick from string, if possible
 		"""
 		split_list = s.split("!")
 		return split_list[0]

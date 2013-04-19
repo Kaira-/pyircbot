@@ -11,8 +11,8 @@ import confwriter
 class IRCBot(object):
 	def __init__(self):
 		self._CONFFILE = "config.conf"
-		self._CONFREADER = ConfReader(self._CONFFILE)
-		self._CONFWRITER = ConfWriter(self._CONFFILE)
+		self._CONFREADER = confreader.ConfReader(self._CONFFILE)
+		self._CONFWRITER = confwriter.ConfWriter(self._CONFFILE)
 		self._config = self._CONFREADER.readConfig()
 		self.SERVER = self._config.SERVER
 		self.CHANNELS = self._config.CHANNELS
@@ -23,8 +23,8 @@ class IRCBot(object):
 
 	def __init__(self, conffile):
 		self._CONFFILE = conffile
-		self._CONFREADER = ConfReader(self._CONFFILE)
-		self._CONFWRITER = ConfWriter(self._CONFFILE)
+		self._CONFREADER = confreader.ConfReader(self._CONFFILE)
+		self._CONFWRITER = confwriter.ConfWriter(self._CONFFILE)
 		self._config = self._CONFREADER.readConfig()
 		self.SERVER = self._config.SERVER
 		self.CHANNELS = self._config.CHANNELS
