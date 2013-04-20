@@ -21,6 +21,7 @@ class ConfReader(object):
 		joinmsg = self._findValue("JOINMSG")
 		quitmsg = self._findValue("QUITMSG")
 		config = config.Config(server, name, port, channels, joinmsg, quitmsg)
+		return config
 
 	def _findValue(self, value):
 		"""
