@@ -32,6 +32,7 @@ class IRCBot(object):
 		self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.PORT = self._config.PORT
 		self.JOINMSG = self._config.JOINMSG
+		self.QUITMSG = self._config.QUITMSG
 		
 	def _connect(self):
 		self.irc.connect((self.SERVER, self.PORT))
@@ -41,7 +42,7 @@ class IRCBot(object):
 	
 	def _joinchannel(self, chan):
 		self.irc.send("JOIN " + chan + "\r\n")
-		self._sendmsg("EVEN IN DEATH I STILL SURF", chan)	#announce join
+		self._sendmsg(self.JOINMSG, chan)	#announce join
 	
 	def _ping(self, data):
 		self.irc.send("PONG " + (data.split()[1]).strip(':') + "\r\n")
@@ -54,7 +55,7 @@ class IRCBot(object):
 		if qmsg != "":
 			self.irc.send("QUIT :" + qmsg + "\r\n")
 		else:
-			self.irc.send("QUIT :Quitting... \r\n")
+			self.irc.send("QUIT :" + self.QUITMSG + "... \r\n")
 		
 	def _sendmsg(self, msg, chan):
 		self.irc.send("PRIVMSG " + chan + " :" + msg + "\r\n")

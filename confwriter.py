@@ -27,6 +27,7 @@ class ConfWriter(object):
 		port = conf.PORT
 		channels = list(conf.CHANNELS)
 		joinmsg = conf.JOINMSG
+		quitmsg = conf.QUITMSG
 
 		try:
 			with open(self._CONFNAME, "w") as f:
@@ -35,5 +36,6 @@ class ConfWriter(object):
 				f.write("CHANNELS=" + ",".join(channels) + "\r\n")
 				f.write("PORT=" + port + "\r\n")
 				f.write("JOINMSG=" + joinmsg + "\r\n")
+				f.write("QUITMSG=" + quitmsg + "\r\n")
 		except IOError as e:
 			print "I/O Error ({0}): {1}".format(e.errno, e.strerror)

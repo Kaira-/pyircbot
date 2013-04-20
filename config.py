@@ -8,7 +8,8 @@ class Config(object):
 		self.PORT = 6667
 		self.CHANNELS = []
 		self.JOINMSG = "I am here."
-	def __init__(self, serv, name, port, channels, joinmsg):
+		self.QUITMSG = "I'm outta here."
+	def __init__(self, serv, name, port, channels, joinmsg, quitmsg):
 		"""
 		Constructs a new Config-object with given parameters.
 		@serv - Servername to connect to
@@ -23,6 +24,7 @@ class Config(object):
 		self.PORT = port
 		self.JOINMSG = joinmsg
 		self.CHANNELS = channels.split(",")
+		self.QUITMSG = quitmsg
 
 	def addChannel(self, newchan):
 		"""
