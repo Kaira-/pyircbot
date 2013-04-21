@@ -9,3 +9,7 @@ class ConfManager(object):
 	def __init__(self):
 		self._confreader = confreader.ConfReader()
 		self._config = self._confreader.readConfig()
+		
+	def readConfig():
+		self._config = self._confreader.readConfig()
+		return self._config
